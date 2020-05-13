@@ -13,11 +13,12 @@ import { Button } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import classnames from 'classnames';
 import { get } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * WooCommerce dependencies
  */
-// import { Spinner } from '@woocommerce/components';
+import { Spinner } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -32,7 +33,7 @@ const TaskList = lazy( () =>
 	import( /* webpackChunkName: "task-list" */ '../task-list' )
 );
 
-const Layout = ( props ) => {
+export const Layout = ( props ) => {
 	const [ showInbox, setShowInbox ] = useState( true );
 	const [ isContentSticky, setIsContentSticky ] = useState( false );
 	const content = useRef( null );
@@ -56,7 +57,7 @@ const Layout = ( props ) => {
 	}, [] );
 
 	const { query, requestingTaskList, taskListHidden } = props;
-	const isTaskListEnabled = isOnboardingEnabled() && ! taskListHidden;
+	const isTaskListEnabled = taskListHidden === false;
 	const isDashboardShown = ! isTaskListEnabled || ! query.task;
 
 	const renderColumns = () => {
@@ -102,7 +103,7 @@ const Layout = ( props ) => {
 		}
 
 		return (
-			<Suspense fallback={ <TaskListPlaceholder /> }>
+			<Suspense fallback={ <Spinner /> }>
 				<TaskList
 					query={ query }
 					inline
@@ -125,7 +126,20 @@ const Layout = ( props ) => {
 	);
 };
 
-export { Layout as _Layout };
+Layout.propTypes = {
+	/**
+	 * If the task list option is being fetched.
+	 */
+	requestingTaskList: PropTypes.bool.isRequired,
+	/**
+	 * If the task list is hidden.
+	 */
+	taskListHidden: PropTypes.bool,
+	/**
+	 * Page query, used to determine the current task if any.
+	 */
+	query: PropTypes.object.isRequired,
+};
 
 export default compose(
 	withSelect( ( select ) => {
